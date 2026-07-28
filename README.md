@@ -80,8 +80,6 @@ pip install numpy pandas scipy matplotlib yfinance
 python run_analysis.py
 ```
 
-⟨FILL IN: if run_analysis.py takes arguments or writes a figure to a specific path, say so here⟩
-
 To call the pieces directly:
 
 ```python
@@ -106,6 +104,3 @@ The tests check the signal has the right sign in known contango / backwardation 
 - Gorton & Rouwenhorst (2006), *Facts and fantasies about commodity futures*, FAJ 62(2).
 - Szymanowska et al. (2014), *An anatomy of commodity futures risk premia*, Journal of Finance 69(1).
 
-## License
-
-MIT
