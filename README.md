@@ -17,28 +17,41 @@ This project measures that slope two ways, standardises it against its own histo
 **Term structure (`term_structure.py`).**
 Each day's curve of log futures prices is fit with a Nelson-Siegel model:
 
-```
-log F(tau) = beta0
-           + beta1 * (1 - exp(-tau/lam)) / (tau/lam)
-           + beta2 * [ (1 - exp(-tau/lam)) / (tau/lam) - exp(-tau/lam) ]
+```math
+\log F(\tau) = \beta_0 + \beta_1 \frac{1 - e^{-\tau/\lambda}}{\tau/\lambda} + \beta_2 \left( \frac{1 - e^{-\tau/\lambda}}{\tau/\lambda} - e^{-\tau/\lambda} \right)
 ```
 
-with `tau` the tenor in months. The three loadings mean:
+with $\tau$ the tenor in months. The three loadings mean:
 
-- `beta0` — the level of the curve
-- `beta1` — the slope; negative slope is backwardation at the front
-- `beta2` — curvature, the hump in the middle
-- `lam` — decay, controlling where that hump sits
+- $\beta_0$ — the level of the curve
+- $\beta_1$ — the slope; negative slope is backwardation at the front
+- $\beta_2$ — curvature, the hump in the middle
+- $\lambda$ — decay, controlling where that hump sits
 
-For a fixed `lam` the model is linear in the betas, so they come straight out of ordinary least squares. `fit_panel` does this across every day at once (vectorised), and there's a joint optimiser over `lam` for single-day fits.
+For a fixed $\lambda$ the model is linear in the betas, so they come straight out of ordinary least squares. `fit_panel` does this across every day at once (vectorised), and there's a joint optimiser over $\lambda$ for single-day fits.
 
 **Signals (`signals.py`).**
-Two measures of backwardation, both built so that a positive number always means backwardation:
+Two measures of backwardation, both built so that a positive number always means backwardation.
 
-- *Roll yield* between a near and far tenor — the annualised log ratio of the two prices. This is the carry you'd actually earn holding the near contract.
-- *Average forward log-slope* across the whole curve.
+*Roll yield* between a near tenor $T_n$ and far tenor $T_f$, annualised — the carry you'd actually earn holding the near contract:
 
-Each is turned into a rolling z-score (default 252-day window) so it can be compared against its own recent history, and a regime label is assigned when the z-score clears +/- 0.5.
+```math
+RY^t = \frac{12}{T_f - T_n} \ln\!\left( \frac{F_n^t}{F_f^t} \right)
+```
+
+*Average forward log-slope* across the whole curve (the code reports $-\beta^t$ so that positive still means backwardation):
+
+```math
+\beta^t = \frac{1}{N-1} \sum_{i=1}^{N-1} \frac{\log F_{i+1}^t - \log F_i^t}{T_{i+1} - T_i}
+```
+
+Each is turned into a rolling z-score (default 252-day window) so it can be compared against its own recent history:
+
+```math
+Z^t = \frac{X^t - \mu_w(X^t)}{\sigma_w(X^t)}
+```
+
+and a regime label is assigned when $Z^t$ clears $\pm 0.5$ — above is backwardation, below is contango, in between is neutral.
 
 **Backtest (`backtest.py`).**
 A deliberately simple rule: go long the front-month contract when the roll-yield z-score is above an entry threshold, flat otherwise, with round-trip costs charged whenever the position changes. It's meant to show the signal carries information, nothing more.
