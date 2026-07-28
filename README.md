@@ -2,7 +2,7 @@
 
 I built this during a Goldman Sachs markets mentorship to get a feel for how the WTI crude futures curve moves between backwardation and contango, and whether that shape carries any tradable information. It fits a Nelson-Siegel curve to the futures term structure each day, turns the slope into a standardised signal, and backtests a minimal long-only rule on top of it.
 
-It's a learning project, not a trading system — the point was to understand the mechanics of term-structure signals, not to claim real alpha.
+It's a learning project, not a trading system, to help understand the mechanics of term-structure signals, not to claim real alpha.
 
 ## The idea
 
